@@ -218,18 +218,18 @@
             </button>
         </div>
 
-        <h1 class="text-5xl md:text-6xl font-extrabold text-center mb-8 bg-gradient-to-r from-purple-500 to-pink-500 text-transparent bg-clip-text tracking-tight">
+        <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-center mb-8 bg-gradient-to-r from-purple-500 to-pink-500 text-transparent bg-clip-text tracking-tight">
             정기화 헤어 예약 시스템
         </h1>
 
         <div class="mb-8 p-5 bg-purple-50 border border-purple-200 rounded-xl text-purple-800 text-base shadow-sm dark:bg-purple-900 dark:border-purple-700 dark:text-purple-200">
-            <p class="font-semibold">사용자 ID: <span id="userIdDisplay" class="font-normal text-purple-700 dark:text-purple-300">로딩 중...</span></p>
-            <p class="mt-3 text-sm text-purple-700 dark:text-purple-300">이 ID는 앱의 데이터를 관리하는 데 사용됩니다. 다른 사용자와 이 앱을 공유하려면 이 ID를 알려주세요.</p>
+            <p class="font-semibold text-sm sm:text-base">사용자 ID: <span id="userIdDisplay" class="font-normal text-purple-700 dark:text-purple-300">로딩 중...</span></p>
+            <p class="mt-3 text-xs sm:text-sm text-purple-700 dark:text-purple-300">이 ID는 앱의 데이터를 관리하는 데 사용됩니다. 다른 사용자와 이 앱을 공유하려면 이 ID를 알려주세요.</p>
         </div>
 
         <!-- Date Selection -->
         <div class="mb-8">
-            <label for="selectedDate" class="block text-xl font-semibold mb-3">날짜 선택</label>
+            <label for="selectedDate" class="block text-lg sm:text-xl font-semibold mb-3">날짜 선택</label>
             <input type="date" id="selectedDate" class="input-field">
         </div>
 
@@ -237,11 +237,11 @@
         <div class="grid grid-cols-1 gap-6 mb-8">
             <!-- Available Time Slots -->
             <div>
-                <h2 class="text-xl font-semibold mb-5">예약 현황</h2>
+                <h2 class="text-xl sm:text-2xl font-semibold mb-5">예약 현황</h2>
                 <!-- Modified timeSlots div for 2 columns per row -->
                 <div id="timeSlots" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <!-- Time slots will be dynamically loaded here -->
-                    <p class="text-gray-500 dark:text-gray-400 text-lg sm:col-span-2">날짜를 선택하여 예약 가능한 시간을 확인하세요.</p>
+                    <p class="text-sm sm:text-base text-gray-500 dark:text-gray-400 sm:col-span-2">날짜를 선택하여 예약 가능한 시간을 확인하세요.</p>
                 </div>
             </div>
         </div>
@@ -251,7 +251,7 @@
     <div id="messageModal" class="modal">
         <div class="modal-content">
             <span class="close-button">&times;</span>
-            <p id="modalMessage" class="text-xl mb-6"></p>
+            <p id="modalMessage" class="text-base sm:text-xl mb-6"></p>
             <button id="modalConfirmBtn" class="btn-primary mt-4 hidden">확인</button>
         </div>
     </div>
@@ -260,25 +260,25 @@
     <div id="bookingManagementModal" class="modal">
         <div class="modal-content">
             <span class="close-button booking-modal-close">&times;</span>
-            <h3 id="bookingModalTitle" class="text-3xl font-semibold mb-6"></h3>
+            <h3 id="bookingModalTitle" class="text-xl sm:text-3xl font-semibold mb-6"></h3>
 
             <!-- Form for New Booking / Blocking Time -->
             <div id="newBookingOrBlockForm" class="space-y-6 text-left">
-                <p class="text-lg text-center">선택하신 시간대에 예약을 추가하시겠습니까?</p>
+                <p class="text-sm sm:text-lg text-center">선택하신 시간대에 예약을 추가하시겠습니까?</p>
                 <div>
-                    <label for="serviceSelect" class="block font-medium mb-2">서비스</label>
+                    <label for="serviceSelect" class="block font-medium mb-2 text-sm sm:text-base">서비스</label>
                     <select id="serviceSelect" class="input-field" required>
                         <!-- Options will be populated by JS -->
                     </select>
                 </div>
                 <!-- Input for '기타' service -->
                 <div id="otherServiceInputContainer" class="hidden">
-                    <label for="otherServiceInput" class="block font-medium mb-2">기타 서비스 내용:</label>
+                    <label for="otherServiceInput" class="block font-medium mb-2 text-sm sm:text-base">기타 서비스 내용:</label>
                     <input type="text" id="otherServiceInput" class="input-field" placeholder="예: 붙임머리 제거">
                 </div>
                 <!-- Input for '개인 시간/휴식 시간' reason -->
                 <div id="blockReasonInputContainer" class="hidden">
-                    <label for="blockReasonInput" class="block font-medium mb-2">잠금 사유 (선택 사항):</label>
+                    <label for="blockReasonInput" class="block font-medium mb-2 text-sm sm:text-base">잠금 사유 (선택 사항):</label>
                     <input type="text" id="blockReasonInput" class="input-field" placeholder="예: 점심시간, 재료 정리">
                 </div>
                 <button id="confirmActionBtn" class="btn-primary w-full">확인</button>
@@ -286,9 +286,9 @@
 
             <!-- Details for Existing Booking / Blocked Time -->
             <div id="existingDetails" class="space-y-4 text-left">
-                <p class="text-lg"><strong>시간:</strong> <span id="detailTime" class="font-semibold"></span></p>
-                <p class="text-lg"><strong>내용:</strong> <span id="detailContent" class="font-semibold"></span></p>
-                <p class="text-lg"><strong>상태:</strong> <span id="detailStatus" class="font-semibold"></span></p>
+                <p class="text-sm sm:text-lg"><strong>시간:</strong> <span id="detailTime" class="font-semibold"></span></p>
+                <p class="text-sm sm:text-lg"><strong>내용:</strong> <span id="detailContent" class="font-semibold"></span></p>
+                <p class="text-sm sm:text-lg"><strong>상태:</strong> <span id="detailStatus" class="font-semibold"></span></p>
                 <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4 mt-8">
                     <button id="markCompleteBtnModal" class="btn-primary hidden">완료 표시</button>
                     <button id="unblockTimeBtnModal" class="btn-primary hidden">잠금 해제</button>
@@ -654,10 +654,11 @@
                 }
 
                 const slotElement = document.createElement('div');
+                // Apply responsive font sizes to time and status text
                 slotElement.className = `time-slot-item p-3 rounded-lg text-sm font-medium flex justify-between items-center ${slotClass}`;
                 slotElement.innerHTML = `
-                    <span class="text-xl font-semibold">${slot}</span>
-                    <span class="status-text text-base">${statusText}${serviceText}</span>
+                    <span class="text-lg sm:text-xl md:text-2xl font-semibold">${slot}</span>
+                    <span class="status-text text-sm sm:text-base md:text-lg">${statusText}${serviceText}</span>
                 `;
                 fragment.appendChild(slotElement);
 
