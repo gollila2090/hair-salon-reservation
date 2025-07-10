@@ -63,6 +63,16 @@
             transform: none; /* No lift effect on past slots */
             box-shadow: none; /* No shadow change on past slots */
         }
+        /* Style for completed time slots (NEW) */
+        .time-slot-item.completed {
+            background-color: #e0f2fe; /* Light blue 50 */
+            color: #0284c7; /* Sky 600 */
+            border-color: #7dd3fc; /* Sky 300 */
+        }
+        .time-slot-item.completed:hover {
+            transform: translateY(-3px); /* Retain lift effect */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
 
         .modal-content {
             background-color: #fefefe;
@@ -119,6 +129,16 @@
         .dark .time-slot-item.past-slot:hover {
             transform: none;
             box-shadow: none;
+        }
+        /* Dark mode style for completed time slots (NEW) */
+        .dark .time-slot-item.completed {
+            background-color: #0c4a6e; /* Dark blue 900 */
+            color: #7dd3fc; /* Sky 300 */
+            border-color: #0369a1; /* Sky 700 */
+        }
+        .dark .time-slot-item.completed:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
         }
 
         /* Common styles (apply to both modes) */
@@ -208,6 +228,28 @@
         .modal-content p {
             margin-bottom: 1rem;
         }
+
+        /* Spinner CSS */
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: #8b5cf6; /* Violet 500 */
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+        .dark .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.2);
+            border-left-color: #a78bfa; /* Violet 400 */
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body class="bg-f8fafc dark:bg-gray-900">
@@ -229,7 +271,7 @@
 
         <!-- Date Selection -->
         <div class="mb-8">
-            <label for="selectedDate" class="block text-lg sm:text-xl font-semibold mb-3">날짜 선택</label>
+            <label for="selectedDate" class="block text-xl sm:text-2xl font-semibold mb-3">날짜 선택</label>
             <input type="date" id="selectedDate" class="input-field">
         </div>
 
@@ -238,23 +280,30 @@
             <!-- Available Time Slots -->
             <div>
                 <h2 class="text-xl sm:text-2xl font-semibold mb-5">예약 현황</h2>
-                <!-- Modified timeSlots div for 2 columns per row -->
+                <!-- Loading Message and Spinner -->
+                <p id="loadingMessage" class="text-sm sm:text-base text-gray-500 dark:text-gray-400 sm:col-span-2 flex items-center justify-center mb-4" style="display: none;">
+                    <span class="spinner"></span> 예약 현황을 불러오는 중...
+                </p>
                 <div id="timeSlots" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <!-- Time slots will be dynamically loaded here -->
-                    <p class="text-sm sm:text-base text-gray-500 dark:text-gray-400 sm:col-span-2">날짜를 선택하여 예약 가능한 시간을 확인하세요.</p>
                 </div>
             </div>
         </div>
+
+        <!-- Creator Information -->
+        <div class="text-center mt-10 text-gray-500 dark:text-gray-400 text-sm">
+            <p>by made 아빠고릴라</p>
+        </div>
     </div>
 
-    <!-- Custom Message Modal -->
-    <div id="messageModal" class="modal">
+    <!-- Custom Message Modal - REMOVED -->
+    <!-- <div id="messageModal" class="modal">
         <div class="modal-content">
             <span class="close-button">&times;</span>
             <p id="modalMessage" class="text-base sm:text-xl mb-6"></p>
             <button id="modalConfirmBtn" class="btn-primary mt-4 hidden">확인</button>
         </div>
-    </div>
+    </div> -->
 
     <!-- Booking Management Modal -->
     <div id="bookingManagementModal" class="modal">
@@ -336,17 +385,12 @@
         const selectedDateInput = document.getElementById('selectedDate');
         const timeSlotsDiv = document.getElementById('timeSlots');
         const userIdDisplay = document.getElementById('userIdDisplay');
+        const loadingMessage = document.getElementById('loadingMessage'); // Get the loading message element
 
         // Theme Toggle Elements
         const themeToggle = document.getElementById('themeToggle');
         const themeIcon = document.getElementById('themeIcon');
         const themeText = document.getElementById('themeText');
-
-        // Message Modal Elements
-        const messageModal = document.getElementById('messageModal');
-        const modalMessage = document.getElementById('modalMessage');
-        const closeButton = document.querySelector('#messageModal .close-button');
-        const modalConfirmBtn = document.getElementById('modalConfirmBtn');
 
         // Booking Management Modal Elements
         const bookingManagementModal = document.getElementById('bookingManagementModal');
@@ -408,60 +452,6 @@
             const currentTheme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
             const newTheme = currentTheme === 'light' ? 'dark' : 'light';
             setTheme(newTheme);
-        });
-
-        // Function to show custom message modal
-        // autoHide: true면 짧은 시간 후 자동 닫힘, false면 사용자가 닫을 때까지 유지
-        function showMessageModal(message, isConfirm = false, onConfirm = null, autoHide = true) {
-            modalMessage.textContent = message;
-            console.log(`[showMessageModal] Called with message: "${message}", isConfirm: ${isConfirm}, autoHide: ${autoHide}`); // Debug log
-
-            if (isConfirm) {
-                modalConfirmBtn.classList.remove('hidden');
-                modalConfirmBtn.onclick = () => {
-                    console.log("[showMessageModal] Confirm button clicked. Hiding modal.");
-                    messageModal.style.display = 'none'; // Hide modal immediately
-                    modalConfirmBtn.classList.add('hidden'); // Hide button
-                    if (onConfirm) {
-                        console.log("[showMessageModal] Executing onConfirm callback.");
-                        onConfirm();
-                    }
-                };
-                messageModal.style.display = 'flex'; // Show the modal
-            } else {
-                modalConfirmBtn.classList.add('hidden'); // Ensure confirm button is hidden
-                modalConfirmBtn.onclick = null; // Clear any previous click handler
-                messageModal.style.display = 'flex'; // Show the modal
-
-                if (autoHide) {
-                    console.log("[showMessageModal] Showing non-confirm message with auto-hide.");
-                    setTimeout(() => {
-                        console.log("[showMessageModal] Auto-hiding non-confirm message.");
-                        messageModal.style.display = 'none'; // Auto-hide after 0.5 seconds
-                    }, 500); // 0.5초 후 자동 닫기
-                } else {
-                    console.log("[showMessageModal] Showing non-confirm message without auto-hide.");
-                    // Do nothing, modal stays until 'X' or outside click
-                }
-            }
-        }
-
-        // Function to hide message modal
-        function hideMessageModal() {
-            console.log("[hideMessageModal] Hiding message modal.");
-            messageModal.style.display = 'none';
-        }
-
-        // Close message modal when close button is clicked
-        closeButton.onclick = () => {
-            hideMessageModal();
-        };
-
-        // Close message modal when clicking outside
-        window.addEventListener('click', (event) => {
-            if (event.target == messageModal) {
-                hideMessageModal();
-            }
         });
 
         // Function to populate service select dropdown
@@ -539,7 +529,7 @@
                 } else {
                     contentDisplay = reservation.service || '선택 안됨';
                     if (reservation.service === '기타' && reservation.customService) {
-                        contentDisplay += `: ${reservation.customService}`;
+                        contentDisplay += `: ${existingReservation.customService}`;
                     }
                     detailStatus.textContent = reservation.status === 'completed' ? '완료' : '예약됨';
                     if (reservation.status !== 'completed') {
@@ -580,8 +570,6 @@
                     console.log("Anonymous sign-in successful (onAuthStateChanged will be triggered again with user data).");
                 } catch (error) {
                     console.error("Firebase authentication error during anonymous sign-in:", error);
-                    // 사용자에게 더 명확한 안내를 제공합니다.
-                    showMessageModal("인증 중 오류가 발생했습니다: " + error.message + ". Firebase 콘솔에서 다음을 확인해주세요: 1. 'Authentication' > 'Sign-in method' 탭으로 이동하여 'Anonymous' 공급자를 활성화했는지. 2. 'Project settings' > 'Your apps'에서 웹 앱의 Firebase 구성 정보가 코드와 일치하는지.", false, null, false); // 이 메시지는 자동 닫힘 없이 유지
                     userIdDisplay.textContent = "인증 실패";
                 }
             }
@@ -602,7 +590,9 @@
 
         // Function to render time slots
         function renderTimeSlots(allSlots, bookedReservationsMap) {
-            timeSlotsDiv.innerHTML = '';
+            timeSlotsDiv.innerHTML = ''; // Clear previous slots
+            loadingMessage.style.display = 'none'; // Hide loading message once slots are rendered
+
             const fragment = document.createDocumentFragment();
             const now = new Date(); // 현재 시간
 
@@ -626,20 +616,20 @@
                     slotClass = 'past-slot';
                     statusText = '예약불가';
                     serviceText = ''; // 과거 시간대는 서비스 내용 표시 안함
-                } else if (isBlocked) {
-                    slotClass = 'blocked';
-                    statusText = '잠김';
-                    if (existingReservation.customService) {
-                        serviceText = ` (${existingReservation.customService})`;
-                    }
-                } else if (isCompleted) {
-                    slotClass = 'booked';
+                } else if (isCompleted) { // Completed status with new styling
+                    slotClass = 'completed';
                     statusText = '완료';
                     serviceText = existingReservation.service ? ` (${existingReservation.service}` : '';
                     if (existingReservation.service === '기타' && existingReservation.customService) {
                         serviceText += `: ${existingReservation.customService}`;
                     }
                     serviceText += ')';
+                } else if (isBlocked) {
+                    slotClass = 'blocked';
+                    statusText = '잠김';
+                    if (existingReservation.customService) {
+                        serviceText = ` (${existingReservation.customService})`;
+                    }
                 } else if (isBookedOrBlocked) {
                     slotClass = 'booked';
                     statusText = '예약됨';
@@ -665,7 +655,7 @@
                 // Add click listener to each time slot
                 slotElement.onclick = () => {
                     if (isPastSlot) {
-                        showMessageModal("지나간 시간에는 예약할 수 없습니다.", false, null, false); // 자동 닫힘 없이 유지
+                        // showMessageModal("지나간 시간에는 예약할 수 없습니다.", false, null, false); // 자동 닫힘 없이 유지
                     } else if (isBookedOrBlocked) {
                         showBookingManagementModal('existing', slot, existingReservation);
                     } else {
@@ -688,7 +678,8 @@
             }
 
             // Show loading indicator immediately
-            timeSlotsDiv.innerHTML = '<p class="text-gray-500 dark:text-gray-400 text-lg sm:col-span-2">예약 현황을 불러오는 중...</p>';
+            timeSlotsDiv.innerHTML = ''; // Clear previous content
+            loadingMessage.style.display = 'flex'; // Show loading message
 
             // Unsubscribe from previous listener if exists
             if (unsubscribe) {
@@ -716,7 +707,11 @@
                 renderTimeSlots(allTimeSlots, bookedReservationsMap);
             }, (error) => {
                 console.error("Error fetching reservations:", error);
-                showMessageModal("예약 정보를 불러오는 중 오류가 발생했습니다: " + error.message, false, null, false); // 이 메시지는 자동 닫힘 없이 유지
+                loadingMessage.textContent = "예약 정보를 불러오는 중 오류가 발생했습니다.";
+                loadingMessage.style.display = 'flex'; // Keep error message visible
+                loadingMessage.classList.remove('flex', 'items-center', 'justify-center'); // Remove spinner styling
+                const spinnerElement = loadingMessage.querySelector('.spinner');
+                if (spinnerElement) spinnerElement.remove(); // Remove spinner
             });
         }
 
@@ -726,7 +721,9 @@
             if (newDate) {
                 loadReservationsForSelectedDate(newDate);
             } else {
-                timeSlotsDiv.innerHTML = '<p class="text-gray-500 dark:text-gray-400 text-lg sm:col-span-2">날짜를 선택하여 예약 가능한 시간을 확인하세요.</p>';
+                timeSlotsDiv.innerHTML = '';
+                loadingMessage.style.display = 'flex';
+                loadingMessage.innerHTML = '<span class="spinner"></span> 날짜를 선택하여 예약 가능한 시간을 확인하세요.';
             }
         });
 
@@ -736,7 +733,6 @@
             bookingManagementModal.style.display = 'none';
 
             if (!currentUserId) {
-                showMessageModal("사용자 인증이 완료되지 않았습니다. 잠시 후 다시 시도해주세요.", false, null, false); // 자동 닫힘 없이 유지
                 return;
             }
 
@@ -746,7 +742,6 @@
             let customService = '';
 
             if (!selectedDate || !reservationTime || !selectedService) {
-                showMessageModal("날짜, 시간, 그리고 서비스를 선택해주세요.", false, null, false); // 자동 닫힘 없이 유지
                 return;
             }
 
@@ -758,7 +753,6 @@
             const selectedDateTime = new Date(selectedYear, selectedMonth - 1, selectedDay, selectedHour, selectedMinute);
 
             if (selectedDateTime < now) {
-                showMessageModal("지나간 시간에는 예약할 수 없습니다.", false, null, false); // 자동 닫힘 없이 유지
                 return;
             }
             // --- 시간 검증 로직 끝 ---
@@ -772,7 +766,6 @@
             const querySnapshot = await getDocs(q);
 
             if (!querySnapshot.empty) {
-                showMessageModal("선택하신 시간에 이미 예약이 있습니다. 다른 시간을 선택해주세요.", false, null, false); // 자동 닫힘 없이 유지
                 return;
             }
 
@@ -786,7 +779,6 @@
                 if (selectedService === '기타') {
                     customService = otherServiceInput.value.trim();
                     if (!customService) {
-                        showMessageModal("기타 서비스 내용을 입력해주세요.", false, null, false); // 자동 닫힘 없이 유지
                         return;
                     }
                     reservationData.service = selectedService;
@@ -803,77 +795,59 @@
                 }
 
                 await addDoc(reservationsRef, reservationData);
-                showMessageModal("작업이 성공적으로 추가되었습니다!", false, null, true); // 성공 메시지는 자동 닫힘
             } catch (e) {
                 console.error("Error adding document: ", e);
-                showMessageModal("작업 추가 중 오류가 발생했습니다: " + e.message, false, null, false); // 자동 닫힘 없이 유지
             }
         });
 
         // Mark reservation as complete from modal
         markCompleteBtnModal.addEventListener('click', async () => {
+            // Close the booking management modal immediately
+            bookingManagementModal.style.display = 'none';
+
             if (!currentUserId || !currentSelectedReservationId) {
-                showMessageModal("사용자 인증 또는 예약 정보가 유효하지 않습니다.", false, null, false); // 자동 닫힘 없이 유지
                 return;
             }
-            showMessageModal('이 예약을 완료 처리하시겠습니까?', true, async () => {
-                try {
-                    const reservationDocRef = doc(db, `artifacts/${appId}/users/${currentUserId}/reservations`, currentSelectedReservationId);
-                    await updateDoc(reservationDocRef, {
-                        status: 'completed'
-                    });
-                    bookingManagementModal.style.display = 'none'; // 예약 관리 모달 먼저 닫기
-                    showMessageModal("예약이 완료 처리되었습니다!", false, null, true); // 성공 메시지는 자동 닫힘
-                } catch (e) {
-                    console.error("Error updating document: ", e);
-                    showMessageModal("예약 완료 처리 중 오류가 발생했습니다: " + e.message, false, null, false); // 자동 닫힘 없이 유지
-                }
-            });
+            try {
+                const reservationDocRef = doc(db, `artifacts/${appId}/users/${currentUserId}/reservations`, currentSelectedReservationId);
+                await updateDoc(reservationDocRef, {
+                    status: 'completed'
+                });
+            } catch (e) {
+                console.error("Error updating document: ", e);
+            }
         });
 
         // Unblock time from modal
         unblockTimeBtnModal.addEventListener('click', async () => {
+            // Close the booking management modal immediately
+            bookingManagementModal.style.display = 'none';
+
             if (!currentUserId || !currentSelectedReservationId) {
-                showMessageModal("사용자 인증 또는 잠금 정보가 유효하지 않습니다.", false, null, false); // 자동 닫힘 없이 유지
                 return;
             }
-            showMessageModal('이 시간 잠금을 해제하시겠습니까?', true, async () => {
-                try {
-                    const reservationDocRef = doc(db, `artifacts/${appId}/users/${currentUserId}/reservations`, currentSelectedReservationId);
-                    await deleteDoc(reservationDocRef);
-                    bookingManagementModal.style.display = 'none'; // 예약 관리 모달 먼저 닫기
-                    showMessageModal("시간 잠금이 해제되었습니다!", false, null, true); // 성공 메시지는 자동 닫힘
-                } catch (e) {
-                    console.error("Error deleting document: ", e);
-                    showMessageModal("시간 잠금 해제 중 오류가 발생했습니다: " + e.message, false, null, false); // 자동 닫힘 없이 유지
-                }
-            });
+            try {
+                const reservationDocRef = doc(db, `artifacts/${appId}/users/${currentUserId}/reservations`, currentSelectedReservationId);
+                await deleteDoc(reservationDocRef);
+            } catch (e) {
+                console.error("Error deleting document: ", e);
+            }
         });
 
         // Delete reservation/block from modal
         deleteReservationBtnModal.addEventListener('click', async () => {
+            // Close the booking management modal immediately
+            bookingManagementModal.style.display = 'none';
+
             if (!currentUserId || !currentSelectedReservationId) {
-                showMessageModal("사용자 인증 또는 정보가 유효하지 않습니다.", false, null, false); // 자동 닫힘 없이 유지
                 return;
             }
-            let confirmMessage = '';
-            if (currentSelectedReservationStatus === 'blocked') {
-                confirmMessage = '이 시간 잠금을 정말로 삭제하시겠습니까?';
-            } else {
-                confirmMessage = '이 예약을 정말로 삭제하시겠습니까?';
+            try {
+                const reservationDocRef = doc(db, `artifacts/${appId}/users/${currentUserId}/reservations`, currentSelectedReservationId);
+                await deleteDoc(reservationDocRef);
+            } catch (e) {
+                console.error("Error deleting document: ", e);
             }
-
-            showMessageModal(confirmMessage, true, async () => {
-                try {
-                    const reservationDocRef = doc(db, `artifacts/${appId}/users/${currentUserId}/reservations`, currentSelectedReservationId);
-                    await deleteDoc(reservationDocRef);
-                    bookingManagementModal.style.display = 'none'; // 예약 관리 모달 먼저 닫기
-                    showMessageModal("삭제되었습니다!", false, null, true); // 성공 메시지는 자동 닫힘
-                } catch (e) {
-                    console.error("Error deleting document: ", e);
-                    showMessageModal("삭제 중 오류가 발생했습니다: " + e.message, false, null, false); // 자동 닫힘 없이 유지
-                }
-            });
         });
 
         // Set today's date as default on load
